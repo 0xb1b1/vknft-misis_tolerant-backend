@@ -1,0 +1,44 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASS}
+      POSTGRES_DB: ${PG_DB}
+    volumes:
+      - "db:/var/lib/postgresql/data"
+
+  backend:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    image: misistolerant/vknft
+    restart: always
+    environment:
+      LOGGING_LEVEL: ${LOGGING_LEVEL}
+      PG_USER: ${PG_USER}
+      PG_PASS: ${PG_PASS}
+      PG_HOST: ${PG_HOST}
+      PG_PORT: ${PG_PORT}
+      PG_DB:   ${PG_DB}
+    depends_on:
+      - db
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   restart: always
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+  #   ports:
+  #     - "23439:80"
+  #   volumes:
+  #     - ./docker/pgadmin:/var/lib/pgadmin
+  #   depends_on:
+  #     - db
+
+volumes:
+  db:
