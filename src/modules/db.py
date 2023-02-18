@@ -67,7 +67,13 @@ class DBManager:
     def get_users(self) -> dict:
         """Get all users from the database"""
         users = self.session.query(User).all()
-        return {user.vk_id: user.wallet_public_key for user in users}
+        return { user.vk_id:
+                 {
+                   'wallet_public_key': user.wallet_public_key,
+                   'first_name': user.first_name,
+                   'last_name': user.last_name
+                 }
+            for user in users}
 
     def auth(self, vk_id: int, wallet_public_key: str, first_name: str, last_name: str) -> bool:
         """Create a new user in the database
