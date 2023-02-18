@@ -11,6 +11,7 @@ from decouple import config
 load_dotenv()
 JWT_SECRET = getenv("JWT_SECRET")
 JWT_ALGORITHM = getenv("JWT_ALGORITHM")
+print(f"!!!!JWT_DECALGO {JWT_SECRET} {JWT_ALGORITHM}")
 
 def token_response(token: str):
     return {
