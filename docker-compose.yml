@@ -17,13 +17,8 @@ services:
       dockerfile: Dockerfile
     image: misistolerant/vknft
     restart: always
-    environment:
-      LOGGING_LEVEL: ${LOGGING_LEVEL}
-      PG_USER: ${PG_USER}
-      PG_PASS: ${PG_PASS}
-      PG_HOST: ${PG_HOST}
-      PG_PORT: ${PG_PORT}
-      PG_DB:   ${PG_DB}
+    env_file:
+      - .env
     depends_on:
       - db
     ports:
