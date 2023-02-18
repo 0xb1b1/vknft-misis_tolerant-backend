@@ -104,7 +104,9 @@ async def login(user: UserLoginSchema = Body(...)):
     return signJWT(user.vk_id)
 
 # region Protected
-
+@api.get("/get/nfts", dependencies=[Depends(JWTBearer())], tags=["user", "nft"])
+async def get_nfts(wallet_addr: str):
+    return await contracts.get_all_nfts(wallet_addr)
 # endregion
 # endregion
 
@@ -116,6 +118,5 @@ async def get_users():
 @api.post("/test/secure", dependencies=[Depends(JWTBearer())], tags=["tests"])
 async def test_secure():
     return {"message": "You are authorized!"}
-
 # endregion
 # endregion
