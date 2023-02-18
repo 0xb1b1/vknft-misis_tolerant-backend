@@ -4,11 +4,7 @@ from datetime import date, datetime, timedelta
 from os import getenv
 from time import sleep
 from sqlalchemy.orm import sessionmaker
-from modules.models import Base, User, UserData
-from modules.models import CoworkingStatus, CoworkingTrustedUser
-from modules.models import Group, GroupType
-from modules.models import ChatSettings
-from modules.models import Coworking, AdminCoworkingNotification
+from modules.models import Base, User, Token, Event, Ticket, Collection, WalletState
 from sqlalchemy import create_engine
 from typing import List, Union
 from sqlalchemy.exc import OperationalError as sqlalchemyOpError
@@ -63,3 +59,25 @@ class DBManager:
         Base.metadata.create_all(self.engine)
         #! Create required tables here
     # endregion
+
+    def user_exists(self, vk_id: int) -> bool:
+        """Check if user exists in the database"""
+        return self.session.query(User).filter_by(vk_id=vk_id).first() is not None
+
+    def auth(self, vk_id: int, wallet_public_key: str, first_name: str, last_name: str) -> bool:
+        """Create a new user in the database
+        Returns True if the user exists, else False"""
+        if self.user_exists(vk_id):
+            self.update_user_wallet(vk_id, wallet_public_key)
+            return True
+        new_user = User(vk_id=vk_id, first_name=first_name, last_name=last_name, wallet_public_key=wallet_public_key)
+        self.session.add(new_user)
+        self.session.commit()
+        return False
+
+    def update_user_wallet(self, vk_id: int, wallet_public_key: str) -> None:
+        """Update user wallet if it's different from the one in the database"""
+        user = self.session.query(User).filter_by(vk_id=vk_id).first()
+        if user.wallet_public_key != wallet_public_key:
+            user.wallet_public_key = wallet_public_key
+        self.session.commit()

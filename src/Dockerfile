@@ -12,6 +12,7 @@ RUN pip install -r requirements.txt
 # Copy source code to working directory
 COPY __init__.py .
 COPY __main__.py .
+COPY api.py .
 COPY modules/ ./modules/
 
 # Create data directory

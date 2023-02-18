@@ -26,6 +26,8 @@ services:
       PG_DB:   ${PG_DB}
     depends_on:
       - db
+    ports:
+      - "7999:8080"
 
   # pgadmin:
   #   image: dpage/pgadmin4

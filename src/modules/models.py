@@ -11,9 +11,10 @@ class User(Base):
     __tablename__ = "user"
 
     id = Column(Integer, primary_key=True)
+    vk_id = Column(Integer, nullable=False)
+    wallet_public_key = Column(String, nullable=True)
     first_name = Column(String(128))
     last_name = Column(String(128))
-    wallet_public_key = Column(String, nullable=True)
     created_events = relationship(
         "Event",
         backref="owner",
