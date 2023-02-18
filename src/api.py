@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, Depends
 
 from modules.auth.model import PostSchema, UserSchema, UserLoginSchema
 from modules.auth.handler import signJWT
+from modules.auth.bearer import JWTBearer
 
 import logging                    # Logging important events
 from dotenv import load_dotenv    # Load environment variables from .env
 from os import getenv             # Get environment variables
 from modules.db import DBManager  # Database manager
+from modules import contracts     # Smart contracts
 
 
 # region Logging
@@ -101,10 +103,19 @@ async def register(user: UserSchema = Body(...)):
 async def login(user: UserLoginSchema = Body(...)):
     return signJWT(user.vk_id)
 
+# region Protected
+
+# endregion
+# endregion
+
 # region Tests
-@api.get("/auth/get_users", tags=["auth"])
+@api.get("/test/get_users", tags=["tests"])
 async def get_users():
     return db.get_users()
+
+@api.post("/test/secure", dependencies=[Depends(JWTBearer())], tags=["tests"])
+async def test_secure():
+    return {"message": "You are authorized!"}
 
 # endregion
 # endregion

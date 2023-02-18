@@ -23,7 +23,7 @@ async def mint_nft(collection_id: str, name: str, description: str, img_url: str
     atrs = []
     for key in attributes:
         atrs.append({"trait_type": key, "value": attributes[key]})
-    
+
     nft_config = {
         "name": name,
         "description": description,
