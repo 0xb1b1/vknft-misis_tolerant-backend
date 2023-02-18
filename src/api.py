@@ -101,5 +101,10 @@ async def register(user: UserSchema = Body(...)):
 async def login(user: UserLoginSchema = Body(...)):
     return signJWT(user.vk_id)
 
+# region Tests
+@api.get("/auth/get_users", tags=["auth"])
+async def get_users():
+    return db.get_users()
+
 # endregion
 # endregion

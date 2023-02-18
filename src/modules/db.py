@@ -64,6 +64,11 @@ class DBManager:
         """Check if user exists in the database"""
         return self.session.query(User).filter_by(vk_id=vk_id).first() is not None
 
+    def get_users(self) -> dict:
+        """Get all users from the database"""
+        users = self.session.query(User).all()
+        return {user.vk_id: user.wallet_public_key for user in users}
+
     def auth(self, vk_id: int, wallet_public_key: str, first_name: str, last_name: str) -> bool:
         """Create a new user in the database
         Returns True if the user exists, else False"""
