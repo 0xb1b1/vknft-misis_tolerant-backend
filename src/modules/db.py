@@ -182,23 +182,25 @@ class DBManager:
         db_tickets = self.session.query(NFT).filter(NFT.eventId == event_id)
         return [TicketResponseSchema.from_orm(ticket) for ticket in db_tickets]
 
-    def get_events(self) -> dict:
+    def get_events(self) -> List[dict]:
         """{ event_id: {'title': title, 'description': description, 'time': timestamp, 'tickets': [tickets], 'collection_id': collectionID, 'place': place, 'owner_id': ownerID, 'allowlist': allowList} }"""
         # Get all events from DB
         events = self.session.query(Event)
         # Prepare the result
-        result = {}
+        result = []
         for event in events:
-            result[event.id] = {
-                "title": event.title,
-                "description": event.description,
-                "datetime": mktime(event.datetime.timetuple()),
-                "tickets": event.tickets,
-                "collection_id": event.collectionID,
-                "place": event.place,
-                "owner_id": event.ownerID,
-                "allowlist": event.allowList,
-            }
+            result.append(
+                {
+                    "event_id": event.id,
+                    "title": event.title,
+                    "description": event.description,
+                    "datetime": mktime(event.datetime.timetuple()),
+                    "tickets": event.tickets,
+                    "collection_id": event.collectionID,
+                    "place": event.place,
+                    "owner_id": event.ownerID,
+                    "allowlist": event.allowList,
+                })
         return result
 
     def get_event_allowlist(self, event_id: int) -> List[int]:
