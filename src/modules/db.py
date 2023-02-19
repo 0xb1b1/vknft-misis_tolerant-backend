@@ -148,14 +148,14 @@ class DBManager:
     def create_event(
         self,
         event_data: EventCreateSchema,
-        owner_id: int,
+        user_id: int,
         collection_id: str,
     ):
         db_event = Event(
             title=event_data.title,
             description=event_data.description,
             place=event_data.place,
-            ownerID=owner_id,
+            ownerID=self.session.query(User).filter(User.id == user_id).one_or_none(),
             datetime=event_data.datetime,
             collectionID=collection_id,
         )

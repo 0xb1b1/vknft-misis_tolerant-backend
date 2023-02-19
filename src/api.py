@@ -193,7 +193,7 @@ async def get_events():
     tags=["event"],
     response_model=list[TicketResponseSchema],
 )
-async def get_events(event_id: int):
+async def get_event_nft(event_id: int):
     return db.get_nfts(event_id)
 
 
