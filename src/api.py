@@ -114,8 +114,9 @@ async def login(user: UserLoginSchema = Body(...)):
 # region Protected
 @api.get("/get/nfts", dependencies=[Depends(JWTBearer())], tags=["user", "nft"])
 async def get_nfts(authorization: str = Header(None)):
-    #return await contracts.get_all_nfts(authpair.get())
-    return authorization
+    authorization = authorization.split(" ")[1]
+    wallet_addr = db.get_user_wallet(authpair.get(authorization))
+    return await contracts.get_all_nfts(wallet_addr)
 # endregion
 # endregion
 

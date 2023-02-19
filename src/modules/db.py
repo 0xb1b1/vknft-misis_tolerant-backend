@@ -92,3 +92,8 @@ class DBManager:
         if user.wallet_public_key != wallet_public_key:
             user.wallet_public_key = wallet_public_key
         self.session.commit()
+
+    def get_user_wallet(self, vk_id: int) -> str:
+        """Get user wallet from the database"""
+        return self.session.query(User).filter_by(vk_id=vk_id).first().wallet_public_key
+
