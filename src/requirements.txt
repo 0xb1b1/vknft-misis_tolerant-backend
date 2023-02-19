@@ -1,6 +1,6 @@
 python_dotenv==0.21.0
 SQLAlchemy==1.4.46
-psycopg2-binary==2.9.5
+psycopg2==2.9.5
 python_dotenv==0.21.0
 
 fastapi==0.92.0

@@ -11,4 +11,3 @@ class ImageTools:
         # POST file to endpoint
         response = r.post(endpoint, files={"file": image})
         return json.loads(response.text)["url"]
-
