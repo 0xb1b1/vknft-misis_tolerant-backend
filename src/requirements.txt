@@ -13,3 +13,6 @@ python-decouple==3.7
 
 requests
 jsonrpcclient
+
+Pillow==9.4.0
+pycryptodome==3.17

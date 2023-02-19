@@ -13,6 +13,7 @@ from modules.db import DBManager  # Database manager
 from modules import contracts     # Smart contracts
 from modules.auth.state import AuthPair
 from modules.imagetools import ImageTools
+from modules.nftimage.nftimage import NFTImage
 
 
 # region Logging
@@ -82,6 +83,7 @@ authpair = AuthPair()
 # endregion
 
 # region Images
+nftimage = NFTImage()
 image = ImageTools(getenv("PICTSHARE_URL"))
 # endregion
 
