@@ -132,7 +132,7 @@ class DBManager:
 
     def update_user_wallet(self, vk_id: int, wallet_public_key: str) -> None:
         """Update user wallet if it's different from the one in the database"""
-        user = self.session.query(User).filter_by(vk_id=vk_id).first()
+        user = self.session.query(User).filter(User.id == vk_id).one_or_none()
         if user.wallet_public_key != wallet_public_key:
             user.wallet_public_key = wallet_public_key
         self.session.commit()
@@ -146,6 +146,9 @@ class DBManager:
             .one_or_none()
             .wallet_public_key
         )
+
+    def get_user(vk_id: int) -> User:
+        return self.session.query(User).filter(User.id == vk_id).one_or_none()
 
     def get_user_first_name(self, vk_id: int) -> str:
         """Get user first name from the database"""

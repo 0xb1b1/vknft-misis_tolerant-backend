@@ -182,7 +182,8 @@ async def mint_nft(
 ):
     token = get_token(authorization)
     log.info(authpair.get(token))
-    wallet_addr = db.get_user_wallet(vk_id)
+    wallet_addr = db.get_user(vk_id).wallet_addr
+    log.error(wallet_addr)
     db_nft = db.get_nft(nft_id)
     log.warning(db_nft.mintImage)
     db_event = db.get_event(db_nft.eventId)
