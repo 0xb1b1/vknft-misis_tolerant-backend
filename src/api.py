@@ -125,7 +125,6 @@ async def nowallet_login(user: UserSimpleLoginSchema = Body(...)):
     # Store the token in authpair
     authpair.post(token["access_token"], user.vk_id)
     #!return token
-    utmp = db.get_user(user.vk_id)
     return f"You are logged in as {user.vk_id}; token: {token['access_token']}, name: {db.get_user_first_name(user.vk_id)} {db.get_user_last_name(user.vk_id)}, wallet: {db.get_user_wallet(user.vk_id)}"
 
 # region Protected
