@@ -95,7 +95,8 @@ class DBManager:
         if not last_name and not user_exists:
             return False
         if user_exists:
-            self.update_user_wallet(vk_id, wallet_public_key)
+            if wallet_public_key:
+                self.update_user_wallet(vk_id, wallet_public_key)
             return True
         new_user = User(vk_id=vk_id, first_name=first_name, last_name=last_name, wallet_public_key=wallet_public_key)
         self.session.add(new_user)
