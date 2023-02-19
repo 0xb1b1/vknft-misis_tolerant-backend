@@ -140,8 +140,8 @@ class DBManager:
     def update_user_wallet(self, vk_id: int, wallet_public_key: str) -> None:
         """Update user wallet if it's different from the one in the database"""
         user = self.get_user_object(vk_id)
-        if user.wallet_public_key != wallet_public_key:
-            user.wallet_public_key = wallet_public_key
+        # if user.wallet_public_key != wallet_public_key:
+        #     user.wallet_public_key = wallet_public_key
         self.session.commit()
 
     def get_user_wallet(self, vk_id: int):
