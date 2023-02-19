@@ -82,11 +82,11 @@ elif logging_level_lower == "critical":
 
 # region Images
 nftimage = NFTImage()
-itools = ImageTools()
+itools = ImageTools(getenv("PICTSHARE_URL"))
 # endregion
 
 # region DB
-db = DBManager(log)
+db = DBManager(log, itools)
 # endregion
 
 # region API

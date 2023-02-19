@@ -35,7 +35,7 @@ class DBManager:
         self.pg_port = getenv("PG_PORT")
         self.pg_db = getenv("PG_DB")
         self.log = log
-        self.itools  = itools
+        self.itools = itools
         self.nftimage = NFTImage()
         connected = False
         while not connected:
@@ -142,18 +142,20 @@ class DBManager:
 
         return (
             self.session.query(User)
-            .filter_by(vk_id=vk_id)
+            .filter(User.id == vk_id)
             .one_or_none()
             .wallet_public_key
         )
 
     def get_user_first_name(self, vk_id: int) -> str:
         """Get user first name from the database"""
-        return self.session.query(User).filter_by(vk_id=vk_id).one_or_none().first_name
+        return (
+            self.session.query(User).filter(User.id == vk_id).one_or_none().first_name
+        )
 
     def get_user_last_name(self, vk_id: int) -> str:
         """Get user last name from the database"""
-        return self.session.query(User).filter_by(vk_id=vk_id).one_or_none().last_name
+        return self.session.query(User).filter(User.id == vk_id).one_or_none().last_name
 
     def create_event(
         self,
@@ -176,9 +178,11 @@ class DBManager:
     def create_nft(self, ticket_data: TicketCreateSchema) -> NFT:
         orig_img_b = req.get(ticket_data.image).content
         blur_img_b = self.nftimage.blur(orig_img_b)
-        mint_img_b = self.nftimage.watermark(self.nftimage.darken(self.nftimage.blur(orig_img_b)))
-        #encr_img_b = self.nftimage.encrypt(mint_img_b, 'super_secret_password')
-        #orig_img = self.itools.upload(orig_img_b)
+        mint_img_b = self.nftimage.watermark(
+            self.nftimage.darken(self.nftimage.blur(orig_img_b))
+        )
+        # encr_img_b = self.nftimage.encrypt(mint_img_b, 'super_secret_password')
+        # orig_img = self.itools.upload(orig_img_b)
         blur_img = self.itools.upload(blur_img_b)
         mint_img = self.itools.upload(mint_img_b)
         db_nft = NFT(
@@ -249,7 +253,7 @@ class DBManager:
     def get_event_allowlist(self, event_id: int) -> List[int]:
         """[vk_id]"""
         # Get event from DB
-        event = self.session.query(Event).filter_by(id=event_id).first()
+        event = self.session.query(Event).filter(Event.id == event_id).first()
         # Prepare the result
         result = []
         for user in event.allowlist:
