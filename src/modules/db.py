@@ -135,15 +135,21 @@ class DBManager:
 
     def get_user_wallet(self, vk_id: int) -> str:
         """Get user wallet from the database"""
-        return self.session.query(User).filter_by(vk_id=vk_id).first().wallet_public_key
+
+        return (
+            self.session.query(User)
+            .filter_by(vk_id=vk_id)
+            .one_or_none()
+            .wallet_public_key
+        )
 
     def get_user_first_name(self, vk_id: int) -> str:
         """Get user first name from the database"""
-        return self.session.query(User).filter_by(vk_id=vk_id).first().first_name
+        return self.session.query(User).filter_by(vk_id=vk_id).one_or_none().first_name
 
     def get_user_last_name(self, vk_id: int) -> str:
         """Get user last name from the database"""
-        return self.session.query(User).filter_by(vk_id=vk_id).first().last_name
+        return self.session.query(User).filter_by(vk_id=vk_id).one_or_none().last_name
 
     def create_event(
         self,
@@ -167,7 +173,7 @@ class DBManager:
         db_nft = NFT(
             title=ticket_data.name,
             description=ticket_data.description,
-            mintImage="",
+            mintImage=ticket_data.image,
             properties=json.dumps(ticket_data.keys),
             eventId=ticket_data.eventId,
             imageKey="".join(
@@ -177,6 +183,16 @@ class DBManager:
         self.session.add(db_nft)
         self.session.commit()
         return db_nft
+
+    def get_nft(self, nft_id) -> NFT | None:
+        return self.session.query(NFT).filter(NFT.id == nft_id).one_or_none()
+
+    def update_mint(self, nft_id: int, mintHash: str):
+        db_nft = self.get_nft(nft_id)
+        db_nft.mintHash = mintHash
+        self.session.add(db_nft)
+        self.session.refresh(db_nft)
+        self.session.commit()
 
     def get_nfts(self, event_id: int) -> list[TicketResponseSchema]:
         db_tickets = self.session.query(NFT).filter(NFT.eventId == event_id)

@@ -2,6 +2,8 @@
 
 from fastapi import FastAPI, Body, Depends, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+import time
+import json
 
 from modules.auth.model import (
     UserLoginSchema,
@@ -20,7 +22,6 @@ from os import getenv  # Get environment variables
 from modules.db import DBManager  # Database manager
 from modules import contracts  # Smart contracts
 from modules.auth.state import AuthPair
-from modules.imagetools import ImageTools
 from modules.nftimage.nftimage import NFTImage
 
 
@@ -99,7 +100,7 @@ authpair = AuthPair()
 
 # region Images
 nftimage = NFTImage()
-image_tool = ImageTools(getenv("PICTSHARE_URL"))
+
 # endregion
 
 # region Helper functions
@@ -119,17 +120,21 @@ def get_token(token: str) -> str:
 # endregion
 
 # region BackgroundTask
-def update_nft_status(
-    nft_id: str,
-    collection_id: str,
-):
+def update_nft_status(data: tuple):
+    internal_id = data[0]
+    nft_id = data[1]
+    collection_id = data[2]
     response = contracts.check_minting_status(nft_id, collection_id)
-
+    log.info(response)
+    log.info(f'hash: {response["onChain"]["status"]}')
     while response["onChain"]["status"] != "success":
         # update nft
+        log.info(response["onChain"]["status"])
         response = contracts.check_minting_status(nft_id, collection_id)
         time.sleep(10)
 
+    db.update_mint(internal_id, response["onChain"]["mintHash"])
+    log.error("It is WORKING!!!")
     # TODO: update
 
 
@@ -168,24 +173,32 @@ async def nowallet_login(user: UserSimpleLoginSchema = Body(...)):
     dependencies=[Depends(JWTBearer())],
 )
 async def mint_nft(
+    vk_id: int,
     nft_id: int,
-    wallet_addr: str,
     background_tasks: BackgroundTasks,
+    authorization: str = Header(None),
 ):
-
+    token = get_token(authorization)
+    log.info(authpair.get(token))
+    wallet_addr = db.get_user_wallet(vk_id)
     db_nft = db.get_nft(nft_id)
+    log.warning(db_nft.mintImage)
     db_event = db.get_event(db_nft.eventId)
     response = await contracts.mint_nft(
-        db_event.collectionID,
+        db_event["collection_id"],
         db_nft.title,
         db_nft.description,
         db_nft.mintImage,
         wallet_addr,
         json.loads(db_nft.properties),
     )
+    log.info(response)
     nft_hash = response["id"]
 
-    background_tasks.add_task(update_nft_status, nft_hash, db_event.collectionID)
+    background_tasks.add_task(
+        update_nft_status, (nft_id, nft_hash, db_event["collection_id"])
+    )
+    return {"status": "ok"}
 
 
 @api.get("/get/nfts", dependencies=[Depends(JWTBearer())], tags=["user", "nft"])
@@ -200,9 +213,7 @@ async def create_event(event: EventCreateSchema, authorization: str = Header(Non
     token = get_token(authorization)
     user_id = authpair.get(token)
     result = await contracts.create_collection(
-        event.title,
-        event.description,
-        "https://moslenta.ru/thumb/1200x0/filters:quality(75):no_upscale()/imgs/2022/06/18/08/5455737/74cfc9ad503e4e49396f70bef990387c5b796d9b.jpg",  # image_tool.upload(event.image)
+        event.title, event.description, event.image
     )
     log.warning(result)
     collection_id = str(result["id"])
@@ -237,6 +248,7 @@ async def create_nft(ticket: TicketCreateSchema, authorization: str = Header(Non
 @api.get("/get/events", dependencies=[Depends(JWTBearer())], tags=["event"])
 async def get_events():
     return db.get_events()
+
 
 @api.get("/get/event", dependencies=[Depends(JWTBearer())], tags=["event"])
 async def get_event_by_id(event_id: int):

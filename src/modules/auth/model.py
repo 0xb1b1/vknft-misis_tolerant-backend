@@ -34,7 +34,7 @@ class UserSimpleLoginSchema(BaseModel):
 class TicketCreateSchema(BaseModel):
     name: str = Field(...)
     description: str = Field(...)
-    image: bytes
+    image: str
     keys: dict[str, str]
     eventId: int
 
@@ -70,7 +70,7 @@ class EventCreateSchema(BaseModel):
     description: str = Field(...)
     place: str = Field(...)
     datetime: datetime  # unix time
-    image: bytes = Field(...)  # bytes encoded PNG
+    image: str = Field(...)  # str encoded PNG
 
     class Config:
         schema_extra = {

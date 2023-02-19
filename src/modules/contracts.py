@@ -38,9 +38,10 @@ async def mint_nft(
         "image": img_url,
         "attributes": atrs,
     }
+    addr = f"solana:{wallet_addr}"
     response = requests.post(
         base_endpoint,
-        json=request("cm_mintNFT", [collection_id, wallet_addr, nft_config]),
+        json=request("cm_mintNFT", [collection_id, addr, nft_config]),
     )
     parsed = parse(response.json())
     if isinstance(parsed, Ok):
@@ -49,7 +50,7 @@ async def mint_nft(
         return {"error": parsed}
 
 
-async def check_minting_status(nft_id: str, collection_id: str):
+def check_minting_status(nft_id: str, collection_id: str) -> dict:
     """Checks the minting status of an NFT via the Quiknode API"""
     response = requests.post(
         base_endpoint, json=request("cm_getNFTMintStatus", [collection_id, nft_id])
