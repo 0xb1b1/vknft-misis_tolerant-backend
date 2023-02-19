@@ -157,6 +157,9 @@ class DBManager:
         """Get user last name from the database"""
         return self.session.query(User).filter(User.id == vk_id).one_or_none().last_name
 
+    def get_user_id(self, vk_id: int) -> User | None:
+        return self.session.query(User).filter(User.id == vk_id).one_or_none()
+
     def create_event(
         self,
         event_data: EventCreateSchema,
@@ -167,7 +170,7 @@ class DBManager:
             title=event_data.title,
             description=event_data.description,
             place=event_data.place,
-            ownerID=event_data.ownerId,
+            ownerID=self.get_user_id(user_id),
             datetime=event_data.datetime,
             collectionID=collection_id,
         )
