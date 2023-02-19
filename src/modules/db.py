@@ -2,7 +2,7 @@
 # region Dependencies
 from datetime import date, datetime, timedelta
 from os import getenv
-from time import sleep
+from time import sleep, mktime
 from sqlalchemy.orm import sessionmaker
 from modules.models import Base, User, Event, UserAllowlist, NFT
 from sqlalchemy import create_engine
@@ -100,3 +100,21 @@ class DBManager:
         """Get user wallet from the database"""
         return self.session.query(User).filter_by(vk_id=vk_id).first().wallet_public_key
 
+    def get_events(self) -> dict:
+        """{ event_id: {'title': title, 'description': description, 'time': timestamp, 'tickets': [tickets], 'collection_id': collectionID, 'place': place, 'owner_id': ownerID, 'allowlist': allowList} }"""
+        # Get all events from DB
+        events = self.session.query(Event)
+        # Prepare the result
+        result = {}
+        for event in events:
+            result[event.event_id] = {
+                'title': event.title,
+                'description': event.description,
+                'time': mktime(event.time.timetuple()),
+                'tickets': event.tickets,
+                'collection_id': event.collectionID,
+                'place': event.place,
+                'owner_id': event.owner_id,
+                'allowlist': event.allowlist
+            }
+        return result

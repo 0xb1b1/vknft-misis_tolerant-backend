@@ -30,7 +30,8 @@ class Event(Base):
     collectionID = Column(Integer)
     place = Column(String(150))
     ownerID = Column(Integer, ForeignKey('users.id'))
-    allowList = Column(Integer)
+    # allowList is a list of user IDs
+    allowList = Column(ARRAY(Integer))
 
     user_allowlist = relationship('UserAllowlist', backref='events')
     nft = relationship('NFT', uselist=False, backref='events')

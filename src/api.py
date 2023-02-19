@@ -136,9 +136,18 @@ async def get_nfts(authorization: str = Header(None)):
 @api.post("/create/event", dependencies=[Depends(JWTBearer())], tags=["event", "admin"])
 async def create_event(event: EventSchema, authorization: str = Header(None)):
     token = get_token(authorization)
-    wallet_addr = db.get_user_wallet(authpair.get(token))
+    #wallet_addr = db.get_user_wallet(authpair.get(token))
     image_url = image.upload(event.image)
-    return await contracts.create_collection(event.title, event.description, image_url)
+    result = await contracts.create_collection(event.title, event.description, image_url)
+    if "error" in result:
+        return result
+    # Write event to DB
+    #! What do we have in result?
+
+@api.get("/get/events", dependencies=[Depends(JWTBearer())], tags=["event"])
+async def get_events():
+    return db.get_events()
+
 # endregion
 # endregion
 
