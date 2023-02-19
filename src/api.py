@@ -148,6 +148,12 @@ async def create_event(event: EventSchema, authorization: str = Header(None)):
 async def get_events():
     return db.get_events()
 
+@api.get("/get/event/allowlist", dependencies=[Depends(JWTBearer())], tags=["event"])
+async def get_event_allowlist(event_id: int):
+    return { "event_id": event_id,
+             "allowlist": db.get_event_allowlist(event_id)
+    }
+
 @api.get("/get/users", dependencies=[Depends(JWTBearer())], tags=["user"])
 async def get_users():
     return db.get_users()

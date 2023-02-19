@@ -127,3 +127,13 @@ class DBManager:
                 'allowlist': event.allowlist
             }
         return result
+
+    def get_event_allowlist(self, event_id: int) -> List[int]:
+        """[vk_id]"""
+        # Get event from DB
+        event = self.session.query(Event).filter_by(id=event_id).first()
+        # Prepare the result
+        result = []
+        for user in event.allowlist:
+            result.append(user.vk_id)
+        return result
