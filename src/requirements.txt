@@ -11,8 +11,8 @@ uvicorn==0.20.0
 PyJWT==2.6.0
 python-decouple==3.7
 
-requests
-jsonrpcclient
+requests==2.28.2
+jsonrpcclient==4.0.2
 
 Pillow==9.4.0
 pycryptodome==3.17
