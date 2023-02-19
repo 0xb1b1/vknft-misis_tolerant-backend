@@ -82,7 +82,7 @@ authpair = AuthPair()
 # endregion
 
 # region Images
-image = ImageTools()
+image = ImageTools(getenv("PICTSHARE_URL"))
 # endregion
 
 # region Helper functions
