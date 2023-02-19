@@ -197,7 +197,7 @@ class DBManager:
                 "collection_id": event.collectionID,
                 "place": event.place,
                 "owner_id": event.ownerID,
-                "allowlist": event.allowlist,
+                "allowlist": event.allowList,
             }
         return result
 
