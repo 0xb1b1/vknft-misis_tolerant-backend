@@ -140,7 +140,7 @@ class DBManager:
     def get_user_wallet(self, vk_id: int):
         """Get user wallet from the database"""
         user = self.session.query(User).filter(User.id == vk_id).one_or_none()
-        return user.wallet_public_key if user.wallet_public_key else None
+        return user.wallet_public_key if user else None
 
     def get_user(vk_id: int) -> User:
         return self.session.query(User).filter(User.id == vk_id).one_or_none()
