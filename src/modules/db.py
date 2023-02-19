@@ -64,7 +64,7 @@ class DBManager:
         """Check if user exists in the database"""
         return self.session.query(User).filter_by(vk_id=vk_id).first() is not None
 
-    def get_users(self) -> dict:
+    def get_users_test(self) -> dict:
         """Get all users from the database"""
         users = self.session.query(User).all()
         return { user.vk_id:
@@ -72,6 +72,15 @@ class DBManager:
                    'wallet_public_key': user.wallet_public_key,
                    'first_name': user.first_name,
                    'last_name': user.last_name
+                 }
+            for user in users}
+
+    def get_users(self) -> dict:
+        """Get all users from the database"""
+        users = self.session.query(User).all()
+        return { user.vk_id:
+                 {
+                   'wallet_public_key': user.wallet_public_key,
                  }
             for user in users}
 

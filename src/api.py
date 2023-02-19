@@ -148,12 +148,16 @@ async def create_event(event: EventSchema, authorization: str = Header(None)):
 async def get_events():
     return db.get_events()
 
+@api.get("/get/users", tags=["user"])
+async def get_users():
+    return db.get_users()
+
 # endregion
 # endregion
 
 # region Tests
 @api.get("/test/get_users", tags=["tests"])
-async def get_users():
-    return db.get_users()
+async def get_users_test():
+    return db.get_users_test()
 # endregion
 # endregion
