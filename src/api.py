@@ -109,6 +109,7 @@ async def login(user: UserLoginSchema = Body(...)):
     token = signJWT(user.vk_id)
     # Store the token in authpair
     authpair.post(token["access_token"], user.vk_id)
+    return token
 
 # region Protected
 @api.get("/get/nfts", dependencies=[Depends(JWTBearer())], tags=["user", "nft"])
