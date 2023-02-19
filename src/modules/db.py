@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 from os import getenv
 from time import sleep
 from sqlalchemy.orm import sessionmaker
-from modules.models import Base, User, Token, Event, Ticket, Collection, WalletState
+from modules.models import Base, User, Event, UserAllowlist, NFT
 from sqlalchemy import create_engine
 from typing import List, Union
 from sqlalchemy.exc import OperationalError as sqlalchemyOpError
