@@ -57,7 +57,6 @@ class DBManager:
         """Create the database structure if it doesn't exist (update)"""
         # Create the tables if they don't exist
         Base.metadata.create_all(self.engine)
-        #! Create required tables here
     # endregion
 
     def user_exists(self, vk_id: int) -> bool:
