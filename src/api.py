@@ -208,6 +208,7 @@ async def mint_nft(
 async def get_nfts(authorization: str = Header(None)):
     token = get_token(authorization)
     log.warning(token)
+    log.warning(authpair.get(token))
     wallet_addr = db.get_user_wallet(authpair.get(token))
     return await contracts.get_all_nfts(wallet_addr)
 
