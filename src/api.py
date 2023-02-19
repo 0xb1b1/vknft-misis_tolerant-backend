@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from fastapi import FastAPI, Body, Depends, Header
+from fastapi import FastAPI, Body, Depends, Header, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 
 from modules.auth.model import (
@@ -118,6 +118,23 @@ def get_token(token: str) -> str:
 
 # endregion
 
+# region BackgroundTask
+def update_nft_status(
+    nft_id: str,
+    collection_id: str,
+):
+    response = contracts.check_minting_status(nft_id, collection_id)
+
+    while response["onChain"]["status"] != "success":
+        # update nft
+        response = contracts.check_minting_status(nft_id, collection_id)
+        time.sleep(10)
+
+    # TODO: update
+
+
+# endregion
+
 # region Endpoints
 @api.get("/", tags=["root"])
 async def root():
@@ -144,6 +161,33 @@ async def nowallet_login(user: UserSimpleLoginSchema = Body(...)):
 
 
 # region Protected
+
+
+@api.post(
+    "/mint_nft/",
+    dependencies=[Depends(JWTBearer())],
+)
+async def mint_nft(
+    nft_id: int,
+    wallet_addr: str,
+    background_tasks: BackgroundTasks,
+):
+
+    db_nft = db.get_nft(nft_id)
+    db_event = db.get_event(db_nft.eventId)
+    response = await contracts.mint_nft(
+        db_event.collectionID,
+        db_nft.title,
+        db_nft.description,
+        db_nft.mintImage,
+        wallet_addr,
+        json.loads(db_nft.properties),
+    )
+    nft_hash = response["id"]
+
+    background_tasks.add_task(update_nft_status, nft_hash, db_event.collectionID)
+
+
 @api.get("/get/nfts", dependencies=[Depends(JWTBearer())], tags=["user", "nft"])
 async def get_nfts(authorization: str = Header(None)):
     token = get_token(authorization)
@@ -193,6 +237,10 @@ async def create_nft(ticket: TicketCreateSchema, authorization: str = Header(Non
 @api.get("/get/events", dependencies=[Depends(JWTBearer())], tags=["event"])
 async def get_events():
     return db.get_events()
+
+@api.get("/get/event", dependencies=[Depends(JWTBearer())], tags=["event"])
+async def get_event_by_id(event_id: int):
+    return db.get_event(event_id)
 
 
 @api.get(
