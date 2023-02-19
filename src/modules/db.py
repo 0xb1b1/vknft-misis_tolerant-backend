@@ -113,6 +113,14 @@ class DBManager:
         """Get user wallet from the database"""
         return self.session.query(User).filter_by(vk_id=vk_id).first().wallet_public_key
 
+    def get_user_first_name(self, vk_id: int) -> str:
+        """Get user first name from the database"""
+        return self.session.query(User).filter_by(vk_id=vk_id).first().first_name
+
+    def get_user_last_name(self, vk_id: int) -> str:
+        """Get user last name from the database"""
+        return self.session.query(User).filter_by(vk_id=vk_id).first().last_name
+
     def get_events(self) -> dict:
         """{ event_id: {'title': title, 'description': description, 'time': timestamp, 'tickets': [tickets], 'collection_id': collectionID, 'place': place, 'owner_id': ownerID, 'allowlist': allowList} }"""
         # Get all events from DB
