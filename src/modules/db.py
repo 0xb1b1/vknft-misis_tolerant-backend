@@ -137,15 +137,10 @@ class DBManager:
             user.wallet_public_key = wallet_public_key
         self.session.commit()
 
-    def get_user_wallet(self, vk_id: int) -> str:
+    def get_user_wallet(self, vk_id: int):
         """Get user wallet from the database"""
-
-        return (
-            self.session.query(User)
-            .filter(User.id == vk_id)
-            .one_or_none()
-            .wallet_public_key
-        )
+        user = self.session.query(User).filter(User.id == vk_id).one_or_none()
+        return user.wallet_public_key if user.wallet_public_key else None
 
     def get_user(vk_id: int) -> User:
         return self.session.query(User).filter(User.id == vk_id).one_or_none()
