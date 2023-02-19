@@ -130,9 +130,16 @@ class DBManager:
         self.session.commit()
         return True
 
+    def get_user_object(self, vk_id: int, wallet: str = "", fname: str = "", lname: str = "") -> User:
+        """Get user object from the database"""
+        user = self.session.query(User).filter(User.id == vk_id).one_or_none()
+        if user is None:
+            # Create user
+            self.auth(vk_id, wallet, fname, lname)
+
     def update_user_wallet(self, vk_id: int, wallet_public_key: str) -> None:
         """Update user wallet if it's different from the one in the database"""
-        user = self.session.query(User).filter(User.id == vk_id).one_or_none()
+        user = self.get_user_object(vk_id)
         if user.wallet_public_key != wallet_public_key:
             user.wallet_public_key = wallet_public_key
         self.session.commit()
@@ -140,8 +147,7 @@ class DBManager:
     def get_user_wallet(self, vk_id: int):
         """Get user wallet from the database"""
         user = self.session.query(User).filter(User.id == vk_id).one_or_none()
-        return user.wallet_public_key if user else None
-
+        return user.wallet_public_key
     def get_user(vk_id: int) -> User:
         return self.session.query(User).filter(User.id == vk_id).one_or_none()
 
