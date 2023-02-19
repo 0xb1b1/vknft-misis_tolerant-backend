@@ -244,6 +244,7 @@ class DBManager:
                     "datetime": mktime(event.datetime.timetuple()),
                     "tickets": event.tickets,
                     "collection_id": event.collectionID,
+                    "image": event.image,
                     "place": event.place,
                     "owner_id": event.ownerID,
                     "allowlist": event.allowList,
