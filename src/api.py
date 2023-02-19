@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI, Body, Depends, Header
 
-from modules.auth.model import PostSchema, UserSchema, UserLoginSchema
+from modules.auth.model import PostSchema, UserSchema, UserLoginSchema, UserLoginNoWalletSchema
 from modules.auth.handler import signJWT
 from modules.auth.bearer import JWTBearer
 
@@ -94,18 +94,24 @@ def check_user(data: UserLoginSchema):
 async def root():
     return {"message": "I love NFTs!"}
 
-@api.post("/auth/register", tags=["auth"])
-async def register(user: UserSchema = Body(...)):
-    #users.append(user) # replace with db call, making sure to hash the password first
+@api.post("/auth/login", tags=["auth"])
+async def login(user: UserLoginSchema = Body(...)):
     db.auth(user.vk_id,
             user.wallet_public_key,
             user.first_name,
             user.last_name)
-    return signJWT(user.vk_id)
+    token = signJWT(user.vk_id)
+    # Store the token in authpair
+    authpair.post(token["access_token"], user.vk_id)
+    return token
 
-
-@api.post("/auth/login", tags=["auth"])
-async def login(user: UserLoginSchema = Body(...)):
+@api.post("/auth/nwlogin", tags=["auth"])
+async def nowallet_login(user: UserLoginNoWalletSchema = Body(...)):
+    if not db.auth(user.vk_id,
+                   None,
+                   user.first_name,
+                   user.last_name):
+        return {"message": "User not found"}
     token = signJWT(user.vk_id)
     # Store the token in authpair
     authpair.post(token["access_token"], user.vk_id)

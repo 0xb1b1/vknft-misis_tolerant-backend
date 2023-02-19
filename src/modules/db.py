@@ -77,14 +77,17 @@ class DBManager:
 
     def auth(self, vk_id: int, wallet_public_key: str, first_name: str, last_name: str) -> bool:
         """Create a new user in the database
-        Returns True if the user exists, else False"""
-        if self.user_exists(vk_id):
+        Returns True if successful, False if user is not found and no wallet is provided"""
+        user_exists = self.user_exists(vk_id)
+        if wallet_public_key == None and not user_exists:
+            return False
+        if user_exists:
             self.update_user_wallet(vk_id, wallet_public_key)
             return True
         new_user = User(vk_id=vk_id, first_name=first_name, last_name=last_name, wallet_public_key=wallet_public_key)
         self.session.add(new_user)
         self.session.commit()
-        return False
+        return True
 
     def update_user_wallet(self, vk_id: int, wallet_public_key: str) -> None:
         """Update user wallet if it's different from the one in the database"""
