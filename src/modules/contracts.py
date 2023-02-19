@@ -15,8 +15,7 @@ async def create_collection(name: str, description: str, img_url: str):
     if isinstance(parsed, Ok):
         return parsed.result # returns the collection id and other data
     else:
-        print(parsed.message)
-        return None
+        return {"error": parsed}
 
 async def mint_nft(collection_id: str, name: str, description: str, img_url: str, wallet_addr: str, attributes: dict):
     """mints an nft via the quiknode api"""
@@ -35,8 +34,7 @@ async def mint_nft(collection_id: str, name: str, description: str, img_url: str
     if isinstance(parsed, Ok):
         return parsed.result # returns the nft id and other data
     else:
-        print(parsed.message)
-        return None
+        return {"error": parsed}
 
 async def check_minting_status(nft_id: str, collection_id:str):
     """checks the minting status of an nft via the quiknode api"""
@@ -45,8 +43,7 @@ async def check_minting_status(nft_id: str, collection_id:str):
     if isinstance(parsed, Ok):
         return parsed.result
     else:
-        print(parsed.message)
-        return None
+        return {"error": parsed}
 
 async def get_all_nfts(wallet_addr: str):
     """gets all nfts owned by a wallet via the quiknode api"""
@@ -55,5 +52,4 @@ async def get_all_nfts(wallet_addr: str):
     if isinstance(parsed, Ok):
         return parsed.result
     else:
-        print(parsed.message)
-        return None
+        return {"error": parsed}
