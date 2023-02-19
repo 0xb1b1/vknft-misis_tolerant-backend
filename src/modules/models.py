@@ -29,6 +29,7 @@ class Event(Base):
     tickets = Column(ARRAY(Integer))
     collectionID = Column(String)
     place = Column(String(150))
+    image = Column(String(300), default="")
     ownerID = Column(Integer, ForeignKey("users.id"))
     # allowList is a list of user IDs
     allowList = Column(ARRAY(Integer))
