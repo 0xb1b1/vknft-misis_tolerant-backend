@@ -1,24 +1,31 @@
 #!/usr/bin/env python3
 # region Dependencies
+import asyncio
+import json
+import string
+from random import choice
 from datetime import date, datetime, timedelta
 from os import getenv
 from time import sleep, mktime
 from sqlalchemy.orm import sessionmaker
 from modules.models import Base, User, Event, UserAllowlist, NFT
+from modules.contracts import mint_nft, create_collection
+from modules.auth.model import UserLoginSchema, UserSimpleLoginSchema, EventCreateSchema
 from sqlalchemy import create_engine
 from typing import List, Union
 from sqlalchemy.exc import OperationalError as sqlalchemyOpError
 from psycopg2 import OperationalError as psycopg2OpError
+
 # endregion
 
 
 class DBManager:
     def __init__(self, log):
-        self.pg_user = getenv('PG_USER')
-        self.pg_pass = getenv('PG_PASS')
-        self.pg_host = getenv('PG_HOST')
-        self.pg_port = getenv('PG_PORT')
-        self.pg_db   = getenv('PG_DB')
+        self.pg_user = getenv("PG_USER")
+        self.pg_pass = getenv("PG_PASS")
+        self.pg_host = getenv("PG_HOST")
+        self.pg_port = getenv("PG_PORT")
+        self.pg_db = getenv("PG_DB")
         self.log = log
         connected = False
         while not connected:
@@ -34,12 +41,13 @@ class DBManager:
         """Close the database connection when the object is destroyed"""
         self._close()
 
-
     # region Connection setup
     def _connect(self) -> None:
         """Connect to the postgresql database"""
-        self.engine = create_engine(f'postgresql+psycopg2://{self.pg_user}:{self.pg_pass}@{self.pg_host}:{self.pg_port}/{self.pg_db}',
-                                    pool_pre_ping=True)
+        self.engine = create_engine(
+            f"postgresql+psycopg2://{self.pg_user}:{self.pg_pass}@{self.pg_host}:{self.pg_port}/{self.pg_db}",
+            pool_pre_ping=True,
+        )
         Base.metadata.bind = self.engine
         db_session = sessionmaker(bind=self.engine)
         self.session = db_session()
@@ -57,6 +65,7 @@ class DBManager:
         """Create the database structure if it doesn't exist (update)"""
         # Create the tables if they don't exist
         Base.metadata.create_all(self.engine)
+
     # endregion
 
     def user_exists(self, vk_id: int) -> bool:
@@ -66,24 +75,28 @@ class DBManager:
     def get_users_test(self) -> dict:
         """Get all users from the database"""
         users = self.session.query(User).all()
-        return { user.vk_id:
-                 {
-                   'wallet_public_key': user.wallet_public_key,
-                   'first_name': user.first_name,
-                   'last_name': user.last_name
-                 }
-            for user in users}
+        return {
+            user.vk_id: {
+                "wallet_public_key": user.wallet_public_key,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+            }
+            for user in users
+        }
 
     def get_users(self) -> dict:
         """Get all users from the database"""
         users = self.session.query(User).all()
-        return { user.vk_id:
-                 {
-                   'wallet_public_key': user.wallet_public_key,
-                 }
-            for user in users}
+        return {
+            user.vk_id: {
+                "wallet_public_key": user.wallet_public_key,
+            }
+            for user in users
+        }
 
-    def auth(self, vk_id: int, wallet_public_key: str, first_name: str, last_name: str) -> bool:
+    def auth(
+        self, vk_id: int, wallet_public_key: str, first_name: str, last_name: str
+    ) -> bool:
         """Create a new user in the database
         Returns True if successful, False if user is not found and no wallet is provided"""
         user_exists = self.user_exists(vk_id)
@@ -97,10 +110,12 @@ class DBManager:
             if wallet_public_key:
                 self.update_user_wallet(vk_id, wallet_public_key)
             return True
-        new_user = User(vk_id=vk_id,
-                        first_name=first_name,
-                        last_name=last_name,
-                        wallet_public_key=wallet_public_key)
+        new_user = User(
+            vk_id=vk_id,
+            first_name=first_name,
+            last_name=last_name,
+            wallet_public_key=wallet_public_key,
+        )
         self.session.add(new_user)
         self.session.commit()
         return True
@@ -124,6 +139,23 @@ class DBManager:
         """Get user last name from the database"""
         return self.session.query(User).filter_by(vk_id=vk_id).first().last_name
 
+    def create_event(
+        self,
+        event_data: EventCreateSchema,
+        owner_id: int,
+        collection_id: str,
+    ):
+        db_event = Event(
+            title=event_data.title,
+            description=event_data.description,
+            place=event_data.place,
+            ownerID=owner_id,
+            time=event_data.datetime,
+            collectionID=collection_id,
+        )
+        self.session.add(db_event)
+        self.session.commit()
+
     def get_events(self) -> dict:
         """{ event_id: {'title': title, 'description': description, 'time': timestamp, 'tickets': [tickets], 'collection_id': collectionID, 'place': place, 'owner_id': ownerID, 'allowlist': allowList} }"""
         # Get all events from DB
@@ -132,14 +164,14 @@ class DBManager:
         result = {}
         for event in events:
             result[event.event_id] = {
-                'title': event.title,
-                'description': event.description,
-                'time': mktime(event.time.timetuple()),
-                'tickets': event.tickets,
-                'collection_id': event.collectionID,
-                'place': event.place,
-                'owner_id': event.owner_id,
-                'allowlist': event.allowlist
+                "title": event.title,
+                "description": event.description,
+                "time": mktime(event.time.timetuple()),
+                "tickets": event.tickets,
+                "collection_id": event.collectionID,
+                "place": event.place,
+                "owner_id": event.owner_id,
+                "allowlist": event.allowlist,
             }
         return result
 
