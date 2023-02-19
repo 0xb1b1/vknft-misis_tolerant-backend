@@ -118,8 +118,8 @@ async def login(user: UserLoginSchema = Body(...)):
 async def nowallet_login(user: UserSimpleLoginSchema = Body(...)):
     if not db.auth(user.vk_id,
                    None,
-                   user.first_name,
-                   user.last_name):
+                   None,
+                   None):
         return {"message": "User not found"}
     token = signJWT(user.vk_id)
     # Store the token in authpair

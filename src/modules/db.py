@@ -88,7 +88,11 @@ class DBManager:
         """Create a new user in the database
         Returns True if successful, False if user is not found and no wallet is provided"""
         user_exists = self.user_exists(vk_id)
-        if wallet_public_key == None and not user_exists:
+        if not wallet_public_key and not user_exists:
+            return False
+        if not first_name and not user_exists:
+            return False
+        if not last_name and not user_exists:
             return False
         if user_exists:
             self.update_user_wallet(vk_id, wallet_public_key)
