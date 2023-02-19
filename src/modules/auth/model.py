@@ -26,3 +26,8 @@ class UserSimpleLoginSchema(BaseModel):
                 "vk_id": "123456789",
             }
         }
+
+class EventSchema(BaseModel):
+    title: str = Field(...)
+    description: str = Field(...)
+    image: str = Field(...)  # Base64 encoded PNG

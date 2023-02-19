@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI, Body, Depends, Header
 
-from modules.auth.model import UserLoginSchema, UserSimpleLoginSchema
+from modules.auth.model import UserLoginSchema, UserSimpleLoginSchema, EventSchema
 from modules.auth.handler import signJWT
 from modules.auth.bearer import JWTBearer
 
@@ -12,6 +12,7 @@ from os import getenv             # Get environment variables
 from modules.db import DBManager  # Database manager
 from modules import contracts     # Smart contracts
 from modules.auth.state import AuthPair
+from modules.imagetools import ImageTools
 
 
 # region Logging
@@ -80,13 +81,21 @@ api = FastAPI()
 authpair = AuthPair()
 # endregion
 
+# region Images
+image = ImageTools()
+# endregion
+
 # region Helper functions
-def check_user(data: UserLoginSchema):
+def check_user(data: UserLoginSchema) -> bool:
     """Log in via VK ID"""
     if db.auth(data.vk_id, data.wallet_public_key):
         return True
     else:
         return False
+
+def get_token(token: str) -> str:
+    """Get token without Bearer"""
+    return token.split(" ")[1]
 # endregion
 
 # region Endpoints
@@ -120,9 +129,16 @@ async def nowallet_login(user: UserSimpleLoginSchema = Body(...)):
 # region Protected
 @api.get("/get/nfts", dependencies=[Depends(JWTBearer())], tags=["user", "nft"])
 async def get_nfts(authorization: str = Header(None)):
-    authorization = authorization.split(" ")[1]
-    wallet_addr = db.get_user_wallet(authpair.get(authorization))
+    token = get_token(authorization)
+    wallet_addr = db.get_user_wallet(authpair.get(token))
     return await contracts.get_all_nfts(wallet_addr)
+
+@api.post("/create/event", dependencies=[Depends(JWTBearer())], tags=["event", "admin"])
+async def create_event(event: EventSchema, authorization: str = Header(None)):
+    token = get_token(authorization)
+    wallet_addr = db.get_user_wallet(authpair.get(token))
+    image_url = image.upload(event.image)
+    return await contracts.create_collection(event.title, event.description, image_url)
 # endregion
 # endregion
 
@@ -130,9 +146,5 @@ async def get_nfts(authorization: str = Header(None)):
 @api.get("/test/get_users", tags=["tests"])
 async def get_users():
     return db.get_users()
-
-@api.post("/test/secure", dependencies=[Depends(JWTBearer())], tags=["tests"])
-async def test_secure():
-    return {"message": "You are authorized!"}
 # endregion
 # endregion

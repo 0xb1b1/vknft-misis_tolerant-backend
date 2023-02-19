@@ -4,24 +4,28 @@ base_endpoint = "https://alpha-sleek-general.solana-devnet.discover.quiknode.pro
 chain = "solana"
 
 async def create_collection(name: str, description: str, img_url: str):
-    """creates a collection via the quiknode api"""
+    """creates a collection via the Quiknode API"""
     metadata = {
         "name": name,
         "description": description,
         "imageUrl": img_url
     }
+
     response = requests.post(base_endpoint,json=request("cm_createCollection", [chain, metadata]))
     parsed = parse(response.json())
     if isinstance(parsed, Ok):
-        return parsed.result # returns the collection id and other data
+        return parsed.result  # Returns the collection id and other data
     else:
-        return {"error": parsed}
+        return { "error": parsed }
+
 
 async def mint_nft(collection_id: str, name: str, description: str, img_url: str, wallet_addr: str, attributes: dict):
-    """mints an nft via the quiknode api"""
+    """Mints an NFT via the Quiknode API"""
     atrs = []
     for key in attributes:
-        atrs.append({"trait_type": key, "value": attributes[key]})
+        atrs.append({ "trait_type": key,
+                      "value": attributes[key]
+                    })
 
     nft_config = {
         "name": name,
@@ -34,22 +38,24 @@ async def mint_nft(collection_id: str, name: str, description: str, img_url: str
     if isinstance(parsed, Ok):
         return parsed.result # returns the nft id and other data
     else:
-        return {"error": parsed}
+        return { "error": parsed }
+
 
 async def check_minting_status(nft_id: str, collection_id:str):
-    """checks the minting status of an nft via the quiknode api"""
+    """Checks the minting status of an NFT via the Quiknode API"""
     response = requests.post(base_endpoint, json=request("cm_getNFTMintStatus", [collection_id, nft_id]))
     parsed = parse(response.json())
     if isinstance(parsed, Ok):
         return parsed.result
     else:
-        return {"error": parsed}
+        return { "error": parsed }
+
 
 async def get_all_nfts(wallet_addr: str):
-    """gets all nfts owned by a wallet via the quiknode api"""
+    """Gets all NFTs owned by a wallet via the Quiknode API"""
     response = requests.post(base_endpoint, json=request("qn_fetchNFTs", [wallet_addr]))
     parsed = parse(response.json())
     if isinstance(parsed, Ok):
         return parsed.result
     else:
-        return {"error": parsed}
+        return { "error": parsed }
