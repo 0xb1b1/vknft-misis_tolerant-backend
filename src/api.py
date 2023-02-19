@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from fastapi import FastAPI, Body, Depends, Header
+from fastapi.middleware.cors import CORSMiddleware
 
 from modules.auth.model import (
     UserLoginSchema,
@@ -84,6 +85,13 @@ db = DBManager(log)
 # region API
 # Create FastAPI instance
 api = FastAPI()
+api.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # region Auth state store
 authpair = AuthPair()
