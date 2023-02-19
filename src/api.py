@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI, Body, Depends, Header
 
-from modules.auth.model import PostSchema, UserSchema, UserLoginSchema, UserLoginNoWalletSchema
+from modules.auth.model import UserLoginSchema, UserSimpleLoginSchema
 from modules.auth.handler import signJWT
 from modules.auth.bearer import JWTBearer
 
@@ -106,7 +106,7 @@ async def login(user: UserLoginSchema = Body(...)):
     return token
 
 @api.post("/auth/nwlogin", tags=["auth"])
-async def nowallet_login(user: UserLoginNoWalletSchema = Body(...)):
+async def nowallet_login(user: UserSimpleLoginSchema = Body(...)):
     if not db.auth(user.vk_id,
                    None,
                    user.first_name,
