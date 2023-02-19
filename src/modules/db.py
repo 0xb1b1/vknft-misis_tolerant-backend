@@ -10,7 +10,13 @@ from time import sleep, mktime
 from sqlalchemy.orm import sessionmaker
 from modules.models import Base, User, Event, UserAllowlist, NFT
 from modules.contracts import mint_nft, create_collection
-from modules.auth.model import UserLoginSchema, UserSimpleLoginSchema, EventCreateSchema
+from modules.auth.model import (
+    UserLoginSchema,
+    UserSimpleLoginSchema,
+    EventCreateSchema,
+    TicketCreateSchema,
+    TicketResponseSchema,
+)
 from sqlalchemy import create_engine
 from typing import List, Union
 from sqlalchemy.exc import OperationalError as sqlalchemyOpError
@@ -150,11 +156,31 @@ class DBManager:
             description=event_data.description,
             place=event_data.place,
             ownerID=owner_id,
-            time=event_data.datetime,
+            datetime=event_data.datetime,
             collectionID=collection_id,
         )
         self.session.add(db_event)
         self.session.commit()
+        return db_event
+
+    def create_nft(self, ticket_data: TicketCreateSchema) -> NFT:
+        db_nft = NFT(
+            title=ticket_data.name,
+            description=ticket_data.description,
+            mintImage="",
+            properties=json.dumps(ticket_data.keys),
+            eventId=ticket_data.eventId,
+            imageKey="".join(
+                choice(string.ascii_uppercase + string.digits) for _ in range(20)
+            ),
+        )
+        self.session.add(db_nft)
+        self.session.commit()
+        return db_nft
+
+    def get_nfts(self, event_id: int) -> list[TicketResponseSchema]:
+        db_tickets = self.session.query(NFT).filter(NFT.eventId == event_id)
+        return [TicketResponseSchema.from_orm(ticket) for ticket in db_tickets]
 
     def get_events(self) -> dict:
         """{ event_id: {'title': title, 'description': description, 'time': timestamp, 'tickets': [tickets], 'collection_id': collectionID, 'place': place, 'owner_id': ownerID, 'allowlist': allowList} }"""

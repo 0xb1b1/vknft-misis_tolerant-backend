@@ -2,7 +2,14 @@
 
 from fastapi import FastAPI, Body, Depends, Header
 
-from modules.auth.model import UserLoginSchema, UserSimpleLoginSchema, EventCreateSchema
+from modules.auth.model import (
+    UserLoginSchema,
+    UserSimpleLoginSchema,
+    EventCreateSchema,
+    EventResponseSchema,
+    TicketCreateSchema,
+    TicketResponseSchema,
+)
 from modules.auth.handler import signJWT
 from modules.auth.bearer import JWTBearer
 
@@ -149,8 +156,6 @@ async def create_event(event: EventCreateSchema, authorization: str = Header(Non
     collection_id = str(result["id"])
 
     # wallet_addr = db.get_user_wallet(authpair.get(token))
-
-    db.create_event(event, user_id, collection_id)
     # wallet_addr = db.get_user_wallet(authpair.get(token))
     # image_url = event.image#image.upload(event.image)
     # result = await contracts.create_collection(
@@ -160,12 +165,36 @@ async def create_event(event: EventCreateSchema, authorization: str = Header(Non
     #     return result
     # Write event to DB
     #! What do we have in result?
-    return event
+
+    db_event = db.create_event(event, user_id, collection_id)
+
+    return {"eventId": db_event.id}  # EventResponseSchema.from_orm(db_event)
+
+
+@api.post(
+    "/create/ticket", dependencies=[Depends(JWTBearer())], tags=["event", "admin"]
+)
+async def create_nft(ticket: TicketCreateSchema, authorization: str = Header(None)):
+    token = get_token(authorization)
+
+    tk = db.create_nft(ticket)
+
+    return TicketResponseSchema.from_orm(tk)  # EventResponseSchema.from_orm(db_event)
 
 
 @api.get("/get/events", dependencies=[Depends(JWTBearer())], tags=["event"])
 async def get_events():
     return db.get_events()
+
+
+@api.get(
+    "/get/event/nfts",
+    dependencies=[Depends(JWTBearer())],
+    tags=["event"],
+    response_model=list[TicketResponseSchema],
+)
+async def get_events(event_id: int):
+    return db.get_nfts(event_id)
 
 
 @api.get("/get/event/allowlist", dependencies=[Depends(JWTBearer())], tags=["event"])

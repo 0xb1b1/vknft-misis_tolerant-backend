@@ -5,11 +5,7 @@ base_endpoint = "https://alpha-sleek-general.solana-devnet.discover.quiknode.pro
 chain = "solana"
 
 
-async def create_collection(
-    name: str,
-    description: str,
-    img_url: str,
-):
+async def create_collection(name: str, description: str, img_url: str):
     """creates a collection via the Quiknode API"""
     metadata = {"name": name, "description": description, "imageUrl": img_url}
 
@@ -29,9 +25,12 @@ async def mint_nft(
     description: str,
     img_url: str,
     wallet_addr: str,
-    atrs: list[dict],
+    attributes: dict,
 ):
     """Mints an NFT via the Quiknode API"""
+    atrs = []
+    for key in attributes:
+        atrs.append({"trait_type": key, "value": attributes[key]})
 
     nft_config = {
         "name": name,

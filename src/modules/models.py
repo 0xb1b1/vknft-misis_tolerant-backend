@@ -25,7 +25,7 @@ class Event(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(50))
     description = Column(String(200))
-    time = Column(DateTime)
+    datetime = Column(DateTime)
     tickets = Column(ARRAY(Integer))
     collectionID = Column(String)
     place = Column(String(150))
@@ -51,13 +51,13 @@ class NFT(Base):
     title = Column(String(50))
     description = Column(String(200))
     attended = Column(Boolean, default=False)
-    mintImage = Column(String(300))
-    blurredImage = Column(String(300))
-    encryptedImage = Column(String(300))
+    mintImage = Column(String(300), default="")
+    blurredImage = Column(String(300), default="")
+    encryptedImage = Column(String(300), default="")
     properties = Column(String(500))
-    mintHash = Column(String(70))
+    mintHash = Column(String(70), default="")
     imageKey = Column(String(20))
-    event_id = Column(Integer, ForeignKey("events.id"))
+    eventId = Column(Integer, ForeignKey("events.id"))
 
 
 # class Token(Model):
