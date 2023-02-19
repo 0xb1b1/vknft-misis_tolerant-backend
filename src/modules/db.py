@@ -21,18 +21,23 @@ from sqlalchemy import create_engine
 from typing import List, Union
 from sqlalchemy.exc import OperationalError as sqlalchemyOpError
 from psycopg2 import OperationalError as psycopg2OpError
+import requests as req
+
+from modules.nftimage.nftimage import NFTImage
 
 # endregion
 
 
 class DBManager:
-    def __init__(self, log):
+    def __init__(self, log, itools):
         self.pg_user = getenv("PG_USER")
         self.pg_pass = getenv("PG_PASS")
         self.pg_host = getenv("PG_HOST")
         self.pg_port = getenv("PG_PORT")
         self.pg_db = getenv("PG_DB")
         self.log = log
+        self.nftimage = NFTImage()
+        self.itools = itools
         connected = False
         while not connected:
             try:
@@ -170,10 +175,20 @@ class DBManager:
         return db_event
 
     def create_nft(self, ticket_data: TicketCreateSchema) -> NFT:
+        orig_img_b = req.get(ticket_data.image).content
+        blur_img_b = self.nftimage.blur(orig_img_b)
+        mint_img_b = self.nftimage.watermark(
+            self.nftimage.darken(self.nftimage.blur(orig_img_b))
+        )
+        # encr_img_b = self.nftimage.encrypt(mint_img_b, 'super_secret_password')
+        # orig_img = self.itools.upload(orig_img_b)
+        blur_img = self.itools.upload(blur_img_b)
+        mint_img = self.itools.upload(mint_img_b)
         db_nft = NFT(
             title=ticket_data.name,
             description=ticket_data.description,
-            mintImage=ticket_data.image,
+            mintImage=mint_img,
+            blurredImage=blur_img,
             properties=json.dumps(ticket_data.keys),
             eventId=ticket_data.eventId,
             imageKey="".join(

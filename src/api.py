@@ -23,6 +23,7 @@ from modules.db import DBManager  # Database manager
 from modules import contracts  # Smart contracts
 from modules.auth.state import AuthPair
 from modules.nftimage.nftimage import NFTImage
+from modules.imagetools import ImageTools
 
 
 # region Logging
@@ -79,8 +80,12 @@ elif logging_level_lower == "critical":
     log.critical("Log level set to critical")
 # endregion
 
+# region Images
+nftimage = NFTImage()
+itools = ImageTools(getenv("PICTSHARE_URL"))
+# endregion
 # region DB
-db = DBManager(log)
+db = DBManager(log, itools)
 # endregion
 
 # region API
@@ -98,10 +103,6 @@ api.add_middleware(
 authpair = AuthPair()
 # endregion
 
-# region Images
-nftimage = NFTImage()
-
-# endregion
 
 # region Helper functions
 def check_user(data: UserLoginSchema) -> bool:
