@@ -98,7 +98,10 @@ class DBManager:
             if wallet_public_key:
                 self.update_user_wallet(vk_id, wallet_public_key)
             return True
-        new_user = User(vk_id=vk_id, first_name=first_name, last_name=last_name, wallet_public_key=wallet_public_key)
+        new_user = User(vk_id=vk_id,
+                        first_name=first_name,
+                        last_name=last_name,
+                        wallet_public_key=wallet_public_key)
         self.session.add(new_user)
         self.session.commit()
         return True
