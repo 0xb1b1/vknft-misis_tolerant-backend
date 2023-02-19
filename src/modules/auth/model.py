@@ -69,6 +69,7 @@ class EventCreateSchema(BaseModel):
     title: str = Field(...)
     description: str = Field(...)
     place: str = Field(...)
+    ownerId: str = Field(...)
     datetime: datetime  # unix time
     image: str = Field(...)  # str encoded PNG
 

@@ -161,7 +161,7 @@ class DBManager:
             title=event_data.title,
             description=event_data.description,
             place=event_data.place,
-            ownerID=self.session.query(User).filter(User.id == user_id).one_or_none(),
+            ownerID=event_data.ownerId,
             datetime=event_data.datetime,
             collectionID=collection_id,
         )
