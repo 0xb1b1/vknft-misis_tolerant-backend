@@ -192,7 +192,7 @@ class DBManager:
             result[event.event_id] = {
                 "title": event.title,
                 "description": event.description,
-                "time": mktime(event.time.timetuple()),
+                "datetime": mktime(event.datetime.timetuple()),
                 "tickets": event.tickets,
                 "collection_id": event.collectionID,
                 "place": event.place,
