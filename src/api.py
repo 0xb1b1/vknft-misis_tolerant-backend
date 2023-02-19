@@ -207,6 +207,7 @@ async def mint_nft(
 @api.get("/get/nfts", dependencies=[Depends(JWTBearer())], tags=["user", "nft"])
 async def get_nfts(authorization: str = Header(None)):
     token = get_token(authorization)
+    log.warning(token)
     wallet_addr = db.get_user_wallet(authpair.get(token))
     return await contracts.get_all_nfts(wallet_addr)
 
