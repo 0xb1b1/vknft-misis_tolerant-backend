@@ -148,7 +148,7 @@ async def create_event(event: EventSchema, authorization: str = Header(None)):
 async def get_events():
     return db.get_events()
 
-@api.get("/get/users", tags=["user"])
+@api.get("/get/users", dependencies=[Depends(JWTBearer())], tags=["user"])
 async def get_users():
     return db.get_users()
 
