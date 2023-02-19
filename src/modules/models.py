@@ -32,14 +32,14 @@ class Event(Base):
     ownerID = Column(Integer, ForeignKey('users.id'))
     allowList = Column(Integer)
 
-    user_allowlist = relationship('UserAllowlist', backref='event')
-    nft = relationship('NFT', uselist=False, backref='event')
+    user_allowlist = relationship('UserAllowlist', backref='events')
+    nft = relationship('NFT', uselist=False, backref='events')
 
 class UserAllowlist(Base):
     __tablename__ = 'user_allowlists'
 
     user_id = Column(Integer, primary_key=True)
-    event_id = Column(Integer, ForeignKey('event.id'))
+    event_id = Column(Integer, ForeignKey('events.id'))
 
 class NFT(Base):
     __tablename__ = 'nfts'
@@ -54,7 +54,7 @@ class NFT(Base):
     properties = Column(String(500))
     mintHash = Column(String(70))
     imageKey = Column(String(20))
-    event_id = Column(Integer, ForeignKey('event.id'))
+    event_id = Column(Integer, ForeignKey('events.id'))
 
 # class Token(Model):
 #     id = fields.IntField(pk=True)
