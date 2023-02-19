@@ -189,7 +189,7 @@ class DBManager:
         # Prepare the result
         result = {}
         for event in events:
-            result[event.event_id] = {
+            result[event.id] = {
                 "title": event.title,
                 "description": event.description,
                 "datetime": mktime(event.datetime.timetuple()),
