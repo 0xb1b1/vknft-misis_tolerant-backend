@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from fastapi import FastAPI, Body, Depends
+from fastapi import FastAPI, Body, Depends, Header
 
 from modules.auth.model import PostSchema, UserSchema, UserLoginSchema
 from modules.auth.handler import signJWT
@@ -11,6 +11,7 @@ from dotenv import load_dotenv    # Load environment variables from .env
 from os import getenv             # Get environment variables
 from modules.db import DBManager  # Database manager
 from modules import contracts     # Smart contracts
+from modules.auth.state import AuthPair
 
 
 # region Logging
@@ -75,6 +76,10 @@ db = DBManager(log)
 # Create FastAPI instance
 api = FastAPI()
 
+# region Auth state store
+authpair = AuthPair()
+# endregion
+
 # region Helper functions
 def check_user(data: UserLoginSchema):
     """Log in via VK ID"""
@@ -101,12 +106,15 @@ async def register(user: UserSchema = Body(...)):
 
 @api.post("/auth/login", tags=["auth"])
 async def login(user: UserLoginSchema = Body(...)):
-    return signJWT(user.vk_id)
+    token = signJWT(user.vk_id)
+    # Store the token in authpair
+    authpair.store(token["access_token"], user.vk_id)
 
 # region Protected
 @api.get("/get/nfts", dependencies=[Depends(JWTBearer())], tags=["user", "nft"])
-async def get_nfts(wallet_addr: str):
-    return await contracts.get_all_nfts(wallet_addr)
+async def get_nfts(authorization: str = Header(None)):
+    #return await contracts.get_all_nfts(authpair.get())
+    return authorization
 # endregion
 # endregion
 

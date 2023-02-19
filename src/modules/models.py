@@ -1,100 +1,60 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, ARRAY
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import JSON, array
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
 
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    vk_id = Column(Integer, nullable=False)
-    wallet_public_key = Column(String, nullable=True)
-    first_name = Column(String(128))
-    last_name = Column(String(128))
-    created_events = relationship(
-        "Event",
-        backref="owner",
-        lazy="dynamic",
-        primaryjoin="User.id == Event.owner_id",
-    )
-    # whilisted_events = relationship(
-    #     "Event",
-    #     backref="owner",
-    #     lazy="dynamic",
-    #     primaryjoin="User.id == Event.owner_id",
-    # )
+    vk_id = Column(Integer)
+    wallet_public_key = Column(String(44))
+    first_name = Column(String(50))
+    last_name = Column(String(50))
 
-
-class Token(Base):
-    __tablename__ = "tokens"
-
-    id = Column(Integer, primary_key=True)
-    auth_token = Column(String(2048))
-    is_used = Column(Boolean)
+    events = relationship('Event', backref='owner')
 
 
 class Event(Base):
-    __tablename__ = "events"
+    __tablename__ = 'events'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(256), nullable=False)
-    description = Column(String(2048), default="")
-    start_datetime = Column(DateTime(timezone=True), server_default=func.now())
-    collection_id = relationship(
-        "Collection",
-        backref="events",
-        lazy="dynamic",
-        primaryjoin="Event.id == Collection.event_id",
-    )
-    # subnail
-    # colection (ticket)
+    title = Column(String(50))
+    description = Column(String(200))
+    time = Column(DateTime)
+    tickets = Column(ARRAY(Integer))
+    collectionID = Column(Integer)
+    place = Column(String(150))
+    ownerID = Column(Integer, ForeignKey('users.id'))
+    allowList = Column(Integer)
 
-    owner_id = Column(Integer, ForeignKey("user.id"))
+    user_allowlist = relationship('UserAllowlist', backref='event')
+    nft = relationship('NFT', uselist=False, backref='event')
 
+class UserAllowlist(Base):
+    __tablename__ = 'user_allowlists'
 
-class Ticket(Base):
-    __tablename__ = "ticket"
+    user_id = Column(Integer, primary_key=True)
+    event_id = Column(Integer, ForeignKey('event.id'))
 
-    id = Column(String(256), primary_key=True)
-    onChain = Column(JSON)
-    nft_metadata = Column(JSON)
-
-    name = Column(String(256), nullable=False)
-    image = Column(String(2048), default="")
-    description = Column(String(2048), default="")
-    attributes = Column(JSON)
-    collection_id = Column(String, ForeignKey("colection.id"))
-
-
-class Collection(Base):
-    __tablename__ = "colection"
-
-    id = Column(String(256), primary_key=True)
-    name = Column(String(256), nullable=False)
-    description = Column(String(2048), default="")
-    image_url = Column(String(2048), default="")
-    nft_metadata = Column(JSON, nullable=True)
-    onchain = Column(JSON, nullable=True)
-
-    event_id = Column(Integer, ForeignKey("events.id"))
-    tickets = relationship(
-        "Ticket",
-        backref="Collection",
-        lazy="dynamic",
-        primaryjoin="Collection.id == Ticket.collection_id",
-    )
-
-
-class WalletState(Base):
-    __tablename__ = "walletstates"
+class NFT(Base):
+    __tablename__ = 'nfts'
 
     id = Column(Integer, primary_key=True)
-    state = Column(String)
-
+    title = Column(String(50))
+    description = Column(String(200))
+    attended = Column(Boolean, default=False)
+    mintImage = Column(String(300))
+    blurredImage = Column(String(300))
+    encryptedImage = Column(String(300))
+    properties = Column(String(500))
+    mintHash = Column(String(70))
+    imageKey = Column(String(20))
+    event_id = Column(Integer, ForeignKey('event.id'))
 
 # class Token(Model):
 #     id = fields.IntField(pk=True)
