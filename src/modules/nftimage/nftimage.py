@@ -3,26 +3,27 @@ from io import BytesIO
 from Crypto.Cipher import AES
 from PIL import Image, ImageFilter, ImageFont, ImageDraw, ImageEnhance, ImageOps
 
+
 class NFTImage:
     def __init__(self):
         self.fonts = {
-            'regular': 'fonts/Roboto-Regular.ttf',
-            'medium': 'fonts/Roboto-Medium.ttf',
-            'bold': 'fonts/Roboto-Bold.ttf',
-            'black': 'fonts/Roboto-Black.ttf'
+            "regular": "modules/nftimage/fonts/Roboto-Regular.ttf",
+            "medium": "modules/nftimage/fonts/Roboto-Medium.ttf",
+            "bold": "modules/nftimage/fonts/Roboto-Bold.ttf",
+            "black": "modules/nftimage/fonts/Roboto-Black.ttf",
         }
-        self.lock_font = 'bold'
-        self.lock_img = 'assets/lock.png'
+        self.lock_font = "bold"
+        self.lock_img = "modules/nftimage/assets/lock.png"
 
     def resize(self, image, size: tuple = (1000, 1000)):
         # If the image is not a square, add padding
         # Do not crop or stretch/compress the image
-        image = Image.open(BytesIO(image)).convert('RGBA')
+        image = Image.open(BytesIO(image)).convert("RGBA")
         w, h = image.size
         # Get the biggest dimension
         max_dim = max(w, h)
         # Create a new image with the biggest dimension
-        outimg = Image.new('RGBA', (max_dim, max_dim), (0, 119, 255, 255))
+        outimg = Image.new("RGBA", (max_dim, max_dim), (0, 119, 255, 255))
         # Paste the original image in the new image without stretching/compressing
         outimg.paste(image, ((max_dim - w) // 2, (max_dim - h) // 2))
 
@@ -30,12 +31,16 @@ class NFTImage:
         outimg = outimg.resize(size)
 
         img_bytes = BytesIO()
-        outimg.save(img_bytes, format='PNG')
+        outimg.save(img_bytes, format="PNG")
         return img_bytes.getvalue()
 
-    def watermark(self, image,
-                  text: str = "Доступно только\nдля пользователей VK NFT",
-                  font: ImageFont = None, font_size: int = 20):
+    def watermark(
+        self,
+        image,
+        text: str = "Доступно только\nдля пользователей VK NFT",
+        font: ImageFont = None,
+        font_size: int = 20,
+    ):
         if not font:
             font = ImageFont.truetype(self.fonts[self.lock_font], size=font_size)
         image = Image.open(BytesIO(image))
@@ -44,8 +49,12 @@ class NFTImage:
         lock_img = Image.open(self.lock_img)
         # Resize lock image
         lock_resize_factor = 0.3
-        lock_img = lock_img.resize((int(lock_img.width * lock_resize_factor),
-                                    int(lock_img.height * lock_resize_factor)))
+        lock_img = lock_img.resize(
+            (
+                int(lock_img.width * lock_resize_factor),
+                int(lock_img.height * lock_resize_factor),
+            )
+        )
         # Get width and height of lock image
         lock_w, lock_h = lock_img.size
         lock_offset = lock_h // 3
@@ -57,38 +66,36 @@ class NFTImage:
         _, _, w, h = draw.textbbox((0, 0), text, font=font)
 
         # Paste lock image in the middle of the image
-        image.paste(lock_img,
-                    ((W-lock_w)//2,
-                     (H-lock_h)//2),
-                    lock_img)
+        image.paste(lock_img, ((W - lock_w) // 2, (H - lock_h) // 2), lock_img)
 
         # Write text on image
-        draw.text(((W-w)/2, (H-h)/2 +
-                   (lock_h + lock_offset)),
-                  text,
-                  font=font,
-                  align='center',
-                  spacing=12,
-                  fill='white')
+        draw.text(
+            ((W - w) / 2, (H - h) / 2 + (lock_h + lock_offset)),
+            text,
+            font=font,
+            align="center",
+            spacing=12,
+            fill="white",
+        )
 
         output = BytesIO()
-        image.save(output, format='PNG')
+        image.save(output, format="PNG")
         return output.getvalue()
 
     def blur(self, image, radius: int = 20):
         image = Image.open(BytesIO(image))
         image = image.filter(ImageFilter.GaussianBlur(radius=radius))
         output = BytesIO()
-        image.save(output, format='PNG')
+        image.save(output, format="PNG")
         return output.getvalue()
 
     def darken(self, image, factor: int = 2):
-        '''Make image darker'''
+        """Make image darker"""
         image = Image.open(BytesIO(image))
         enhancer = ImageEnhance.Brightness(image)
         image = enhancer.enhance(0.5)
         output = BytesIO()
-        image.save(output, format='PNG')
+        image.save(output, format="PNG")
         return output.getvalue()
 
     def encrypt(self, file: bytes, key: str):
@@ -97,10 +104,10 @@ class NFTImage:
         iv = os.urandom(16)
 
         # Pad the password to a multiple of 16 bytes
-        key = key.ljust(16, '\0')
+        key = key.ljust(16, "\0")
 
         # Create the AES cipher object with 128-bit key
-        cipher = AES.new(bytes(key, 'utf-8'), AES.MODE_CBC, iv)
+        cipher = AES.new(bytes(key, "utf-8"), AES.MODE_CBC, iv)
 
         # Write the initialization vector to the output
         output = iv
@@ -112,9 +119,9 @@ class NFTImage:
             if len(chunk) == 0:
                 break
             elif len(chunk) % chunk_size != 0:
-                chunk += b'\0' * (chunk_size - len(chunk) % chunk_size)
+                chunk += b"\0" * (chunk_size - len(chunk) % chunk_size)
             encrypted_chunk = cipher.encrypt(chunk)
-            output += (encrypted_chunk)
+            output += encrypted_chunk
         return output
 
     def decrypt(self, file, key: str):
@@ -123,14 +130,14 @@ class NFTImage:
         iv = file.read(16)
 
         # Pad the password to a multiple of 16 bytes
-        key = key.ljust(16, '\0')
+        key = key.ljust(16, "\0")
 
         # Create the AES cipher object with 128-bit key
-        cipher = AES.new(bytes(key, 'utf-8'), AES.MODE_CBC, iv)
+        cipher = AES.new(bytes(key, "utf-8"), AES.MODE_CBC, iv)
 
         # Read the encrypted data
         chunk_size = 16
-        output = b''
+        output = b""
         while True:
             chunk = file.read(chunk_size)
             if len(chunk) == 0:
