@@ -9,7 +9,6 @@ from os import getenv
 from time import sleep, mktime
 from sqlalchemy.orm import sessionmaker
 from modules.models import Base, User, Event, UserAllowlist, NFT
-from modules.contracts import mint_nft, create_collection
 from modules.auth.model import (
     UserLoginSchema,
     UserSimpleLoginSchema,
