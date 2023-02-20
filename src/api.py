@@ -20,7 +20,7 @@ import logging  # Logging important events
 from dotenv import load_dotenv  # Load environment variables from .env
 from os import getenv  # Get environment variables
 from modules.db import DBManager  # Database manager
-from modules import contracts  # Smart contracts
+from modules import contracts as smcon # Smart contracts
 from modules.auth.state import AuthPair
 from modules.nftimage.nftimage import NFTImage
 from modules.imagetools import ImageTools
@@ -86,6 +86,10 @@ itools = ImageTools(getenv("PICTSHARE_URL"))
 # endregion
 # region DB
 db = DBManager(log, itools)
+# endregion
+
+# region Smart Contracts
+contracts = smcon.SmartContracts(log)
 # endregion
 
 # region API
