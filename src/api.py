@@ -89,7 +89,7 @@ db = DBManager(log, itools)
 # endregion
 
 # region Smart Contracts
-contracts = smcon.SmartContracts(log)
+contracts = smcon.SmartContracts(log, getenv("QUICKNODE_ENDPOINT_SECRET"))  # type: ignore
 # endregion
 
 # region API
@@ -136,10 +136,10 @@ def update_nft_status(data: tuple):
         # update nft
         log.info(response["onChain"]["status"])
         response = contracts.check_minting_status(nft_id, collection_id)
-        time.sleep(10)
+        time.sleep(60)
 
     db.update_mint(internal_id, response["onChain"]["mintHash"])
-    log.error("It is WORKING!!!")
+    log.debug(f"Updating NFT status: {internal_id=}, {nft_id=}, {collection_id=}")
     # TODO: update
 
 

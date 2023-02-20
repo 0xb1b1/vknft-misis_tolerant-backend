@@ -2,20 +2,19 @@ import requests
 from jsonrpcclient.responses import parse, Ok
 from jsonrpcclient.requests import request
 
-base_endpoint = "https://alpha-sleek-general.solana-devnet.discover.quiknode.pro/b511198243861757412f978f597d03eb715ce6a5/"
-chain = "solana"
-
 
 class SmartContracts:
-    def __init__(self, log):
+    def __init__(self, log, endpoint_secret: str, chain: str = "solana"):
         self.log = log
+        self.base_endpoint = f"https://alpha-sleek-general.solana-devnet.discover.quiknode.pro/{endpoint_secret}/"
+        self.chain = chain
 
     async def create_collection(self, name: str, description: str, img_url: str):
         """creates a collection via the Quiknode API"""
         metadata = {"name": name, "description": description, "imageUrl": img_url}
 
         response = requests.post(
-            base_endpoint, json=request("cm_createCollection", [chain, metadata])
+            self.base_endpoint, json=request("cm_createCollection", [self.chain, metadata])
         )
         parsed = parse(response.json())
         if isinstance(parsed, Ok):
@@ -52,7 +51,7 @@ class SmartContracts:
         addr = f"solana:{wallet_addr}"
         self.log.debug(f"SmartContracts mint_nft addr: {addr}")
         response = requests.post(
-            base_endpoint,
+            self.base_endpoint,
             json=request("cm_mintNFT", [collection_id, addr, nft_config]),
         )
         parsed = parse(response.json())
@@ -67,7 +66,7 @@ class SmartContracts:
     def check_minting_status(self, nft_id: str, collection_id: str) -> dict:
         """Checks the minting status of an NFT via the Quiknode API"""
         response = requests.post(
-            base_endpoint, json=request("cm_getNFTMintStatus", [collection_id, nft_id])
+            self.base_endpoint, json=request("cm_getNFTMintStatus", [collection_id, nft_id])
         )
         parsed = parse(response.json())
         if isinstance(parsed, Ok):
@@ -80,7 +79,7 @@ class SmartContracts:
 
     async def get_all_nfts(self, wallet_addr: str):
         """Gets all NFTs owned by a wallet via the Quiknode API"""
-        response = requests.post(base_endpoint, json=request("qn_fetchNFTs", [wallet_addr]))
+        response = requests.post(self.base_endpoint, json=request("qn_fetchNFTs", [wallet_addr]))
         parsed = parse(response.json())
         if isinstance(parsed, Ok):
             self.log.debug(f"SmartContracts get_all_nfts result: {parsed.result}")
