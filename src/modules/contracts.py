@@ -1,5 +1,6 @@
 import requests
-from jsonrpcclient import request, parse, Ok
+from jsonrpcclient.responses import parse, Ok
+from jsonrpcclient.requests import request
 
 base_endpoint = "https://alpha-sleek-general.solana-devnet.discover.quiknode.pro/b511198243861757412f978f597d03eb715ce6a5/"
 chain = "solana"
@@ -18,8 +19,10 @@ class SmartContracts:
         )
         parsed = parse(response.json())
         if isinstance(parsed, Ok):
+            self.log.debug(f"SmartContracts create_collection result: {parsed.result}")
             return parsed.result  # Returns the collection id and other data
         else:
+            self.log.debug(f"SmartContracts create_collection result (error): {parsed}")
             return {"error": parsed}
 
 
@@ -33,25 +36,31 @@ class SmartContracts:
         attributes: dict,
     ):
         """Mints an NFT via the Quiknode API"""
-        atrs = []
+        attrs = []
         for key in attributes:
-            atrs.append({"trait_type": key, "value": attributes[key]})
+            attrs.append({"trait_type": key, "value": attributes[key]})
+
+        self.log.debug(f"SmartContracts mint_nft attrs: {attrs}")
 
         nft_config = {
             "name": name,
             "description": description,
             "image": img_url,
-            "attributes": atrs,
+            "attributes": attrs,
         }
+        self.log.debug(f"SmartContracts mint_nft nft_config: {nft_config}")
         addr = f"solana:{wallet_addr}"
+        self.log.debug(f"SmartContracts mint_nft addr: {addr}")
         response = requests.post(
             base_endpoint,
             json=request("cm_mintNFT", [collection_id, addr, nft_config]),
         )
         parsed = parse(response.json())
         if isinstance(parsed, Ok):
+            self.log.debug(f"SmartContracts mint_nft result: {parsed.result}")
             return parsed.result  # returns the nft id and other data
         else:
+            self.log.debug(f"SmartContracts mint_nft result (error): {parsed}")
             return {"error": parsed}
 
 
@@ -62,8 +71,10 @@ class SmartContracts:
         )
         parsed = parse(response.json())
         if isinstance(parsed, Ok):
+            self.log.debug(f"SmartContracts check_minting_status result: {parsed.result}")
             return parsed.result
         else:
+            self.log.debug(f"SmartContracts check_minting_status result (error): {parsed}")
             return {"error": parsed}
 
 
@@ -72,6 +83,8 @@ class SmartContracts:
         response = requests.post(base_endpoint, json=request("qn_fetchNFTs", [wallet_addr]))
         parsed = parse(response.json())
         if isinstance(parsed, Ok):
+            self.log.debug(f"SmartContracts get_all_nfts result: {parsed.result}")
             return parsed.result
         else:
+            self.log.debug(f"SmartContracts get_all_nfts result (error): {parsed}")
             return {"error": parsed}
