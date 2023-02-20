@@ -211,7 +211,7 @@ class DBManager:
 
     def get_nfts(self, event_id: int) -> list[TicketResponseSchema]:
         db_tickets = self.session.query(NFT).filter(NFT.eventId == event_id)
-        return [TicketResponseSchema.from_orm(ticket) for ticket in db_tickets]
+        return [TicketResponseSchema.from_orm(ticket) for ticket in db_tickets if ticket.mintHash == None]
 
     def get_event(self, event_id: int) -> dict:
         event = self.session.query(Event).filter(Event.id == event_id).one_or_none()
