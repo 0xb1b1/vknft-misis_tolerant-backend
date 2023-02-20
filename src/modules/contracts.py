@@ -4,9 +4,9 @@ from jsonrpcclient.requests import request
 
 
 class SmartContracts:
-    def __init__(self, log, endpoint_secret: str, chain: str = "solana"):
+    def __init__(self, log, endpoint: str, chain: str = "solana"):
         self.log = log
-        self.base_endpoint = f"https://alpha-sleek-general.solana-devnet.discover.quiknode.pro/{endpoint_secret}/"
+        self.base_endpoint = endpoint
         self.chain = chain
 
     async def create_collection(self, name: str, description: str, img_url: str):
